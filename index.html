@@ -43,9 +43,9 @@
     const url = new URL(window.location.href);
     return url.searchParams.get(name);
   }
-  const PROLIFIC_PID = getQueryParam("PROLIFIC_PID");
-  const STUDY_ID     = getQueryParam("STUDY_ID");
-  const SESSION_ID   = getQueryParam("SESSION_ID");
+  const PROLIFIC_PID = getQueryParam("PROLIFIC_PID") || "999";
+  const STUDY_ID     = getQueryParam("STUDY_ID") || "999";
+  const SESSION_ID   = getQueryParam("SESSION_ID") || "999";
 
   // ---------------------------
   // Define stimuli
@@ -129,6 +129,7 @@
           <div>SESSION_ID: ${SESSION_ID || "NA"}</div>
         </div>` : "";
 
+      
       jsPsych.data.addProperties({PROLIFIC_PID, STUDY_ID, SESSION_ID}); // add Prolific info to all rows of data
       url = "https://script.google.com/macros/s/AKfycbyLL_BGWmONph2F_4AQmY8-1k3n0jscD-8EdFpn2WbWnluYMQfLA147U6gbizP50cdu/exec";
       jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
