@@ -24,7 +24,7 @@
 
     /* generate a unique filename for saved data */
     const subject_id = jsPsych.randomization.randomID(10);
-    const filename = `${subject_id}.csv`;
+    const filename = `${subject_id}.json`;
 
     /* preload images */
     var preload = {
@@ -127,7 +127,7 @@
       experiment_id: "lsxsVJ8tC46b",
       filename: filename,
       data_string: function() {
-        return jsPsych.data.get().csv();
+        return jsPsych.data.get().json();
       }
     };
     timeline.push(save_data);
