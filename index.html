@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
     <link href="https://unpkg.com/jspsych@8.2.3/css/jspsych.css" rel="stylesheet" type="text/css" />
   </head>
   <body></body>
@@ -15,14 +16,15 @@
     var jsPsych = initJsPsych({
       on_finish: function() {
         jsPsych.data.displayData();
-        // jsPsych.data.addProperties({PROLIFIC_PID, STUDY_ID, SESSION_ID}); // add Prolific info to all rows of data
-        url = "https://script.google.com/macros/s/AKfycbyLL_BGWmONph2F_4AQmY8-1k3n0jscD-8EdFpn2WbWnluYMQfLA147U6gbizP50cdu/exec";
-        jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
       }
     });
 
     /* create timeline */
     var timeline = [];
+
+    /* generate a unique filename for saved data */
+    const subject_id = jsPsych.randomization.randomID(10);
+    const filename = `${subject_id}.csv`;
 
     /* preload images */
     var preload = {
@@ -117,6 +119,18 @@
       }
     };
     timeline.push(debrief_block);
+
+    /* save data to OSF via DataPipe */
+    var save_data = {
+      type: jsPsychPipe,
+      action: "save",
+      experiment_id: "lsxsVJ8tC46b",
+      filename: filename,
+      data_string: function() {
+        return jsPsych.data.get().csv();
+      }
+    };
+    timeline.push(save_data);
 
     /* start the experiment */
     jsPsych.run(timeline);
