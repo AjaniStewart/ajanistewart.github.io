@@ -106,8 +106,6 @@
       },
       on_finish: function(data){
         data.correct = (data.response === data.correct_index);
-        url = "https://script.google.com/macros/s/AKfycbyLL_BGWmONph2F_4AQmY8-1k3n0jscD-8EdFpn2WbWnluYMQfLA147U6gbizP50cdu/exec";
-        jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
       }
     };
 
@@ -130,6 +128,10 @@
           <div>STUDY_ID: ${STUDY_ID || "NA"}</div>
           <div>SESSION_ID: ${SESSION_ID || "NA"}</div>
         </div>` : "";
+
+      jsPsych.data.addProperties({PROLIFIC_PID, STUDY_ID, SESSION_ID}); // add Prolific info to all rows of data
+      url = "https://script.google.com/macros/s/AKfycbyLL_BGWmONph2F_4AQmY8-1k3n0jscD-8EdFpn2WbWnluYMQfLA147U6gbizP50cdu/exec";
+      jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
 
       document.body.innerHTML = `
         <div class="center" style="max-width:720px; margin:60px auto;">
