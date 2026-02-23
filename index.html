@@ -1,202 +1,125 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>Match-to-Sample (jsPsych)</title>
+  <head>
+    <title>My experiment</title>
+    <script src="https://unpkg.com/jspsych@8.2.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+    <link href="https://unpkg.com/jspsych@8.2.3/css/jspsych.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body></body>
+  <script>
 
-<!-- jsPsychSheet library -->
-<script src="./jsPsychsheet/jspsychsheet.js"></script>
-<link rel="stylesheet" href="./jsPsychsheet/jspsychsheet.css">
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+      on_finish: function() {
+        jsPsych.data.displayData();
+        // jsPsych.data.addProperties({PROLIFIC_PID, STUDY_ID, SESSION_ID}); // add Prolific info to all rows of data
+        url = "https://script.google.com/macros/s/AKfycbyLL_BGWmONph2F_4AQmY8-1k3n0jscD-8EdFpn2WbWnluYMQfLA147U6gbizP50cdu/exec";
+        jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
+      }
+    });
 
-<!-- jQuery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    /* create timeline */
+    var timeline = [];
 
-  <!-- jsPsych core -->
-  <script src="https://unpkg.com/jspsych@7.3.4"></script>
-  <link href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css" rel="stylesheet" />
+    /* preload images */
+    var preload = {
+      type: jsPsychPreload,
+      images: ['img/blue.png', 'img/orange.png']
+    };
+    timeline.push(preload);
 
-  <!-- plugins -->
-  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-call-function@1.1.3"></script>
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "Welcome to the experiment. Press any key to begin."
+    };
+    timeline.push(welcome);
 
-  <style>
-    body { background: #fff; }
-    .stim {
-      width: 140px; height: 140px;
-      border-radius: 18px;
-      display: inline-block;
-      margin: 18px;
-      border: 3px solid #111;
-    }
-    .row { display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; }
-    .center { text-align: center; font-size: 20px; }
-  </style>
-</head>
-<body></body>
-
-<script>
-  // ---------------------------
-  // Helpers: read Prolific params if present
-  // ---------------------------
-  function getQueryParam(name){
-    const url = new URL(window.location.href);
-    return url.searchParams.get(name);
-  }
-  const PROLIFIC_PID = getQueryParam("PROLIFIC_PID") || "999";
-  const STUDY_ID     = getQueryParam("STUDY_ID") || "999";
-  const SESSION_ID   = getQueryParam("SESSION_ID") || "999";
-
-  // ---------------------------
-  // Define stimuli
-  // ---------------------------
-  const COLORS = [
-    {name:"red",    hex:"#e53935"},
-    {name:"green",  hex:"#43a047"},
-    {name:"blue",   hex:"#1e88e5"},
-    {name:"yellow", hex:"#fdd835"}
-  ];
-
-  function stimDiv(colorHex){
-    return `<div class="stim" style="background:${colorHex}"></div>`;
-  }
-
-  function shuffle(arr){
-    return arr.map(v => ({v, r: Math.random()}))
-              .sort((a,b)=>a.r-b.r)
-              .map(x=>x.v);
-  }
-
-  // build a trial: show sample color -> delay -> choose between 2 options
-  function makeMTSTrial(sample, foil){
-    const choices = shuffle([sample, foil]); // randomize button order
-    const correctIndex = choices.findIndex(c => c.name === sample.name);
-
-    const sampleScreen = {
+    /* define instructions trial */
+    var instructions = {
       type: jsPsychHtmlKeyboardResponse,
       stimulus: `
-        <div class="center">
-          <div>Remember this sample</div>
-          <div style="margin-top:18px;">${stimDiv(sample.hex)}</div>
-          <div style="margin-top:18px; font-size:16px; opacity:0.7;">(press space)</div>
-        </div>`,
-      choices: [" "],
-      data: {phase:"sample", sample: sample.name, foil: foil.name}
+        <p>In this experiment, a circle will appear in the center 
+        of the screen.</p><p>If the circle is <strong>blue</strong>, 
+        press the letter F on the keyboard as fast as you can.</p>
+        <p>If the circle is <strong>orange</strong>, press the letter J 
+        as fast as you can.</p>
+        <div style='width: 700px;'>
+        <div style='float: left;'><img src='img/blue.png'></img>
+        <p class='small'><strong>Press the F key</strong></p></div>
+        <div style='float: right;'><img src='img/orange.png'></img>
+        <p class='small'><strong>Press the J key</strong></p></div>
+        </div>
+        <p>Press any key to begin.</p>
+      `,
+      post_trial_gap: 2000
     };
+    timeline.push(instructions);
 
-    const delay = {
+    /* define trial stimuli array for timeline variables */
+    var test_stimuli = [
+      { stimulus: "img/blue.png",  correct_response: 'f'},
+      { stimulus: "img/orange.png",  correct_response: 'j'}
+    ];
+
+    /* define fixation and test trials */
+    var fixation = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<div class="center">+</div>`,
+      stimulus: '<div style="font-size:60px;">+</div>',
       choices: "NO_KEYS",
-      trial_duration: 500,
-      data: {phase:"delay"}
-    };
-
-    const choiceScreen = {
-      type: jsPsychHtmlButtonResponse,
-      stimulus: `<div class="center">Which one matches the sample?</div>`,
-      choices: choices.map(c => stimDiv(c.hex)),
-      button_html: `<button class="jspsych-btn" style="padding:0; border:none; background:transparent;">%choice%</button>`,
-      data: {
-        phase:"choice",
-        sample: sample.name,
-        foil: foil.name,
-        correct_index: correctIndex,
-        choice_order: choices.map(c=>c.name).join(","),
+      trial_duration: function(){
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
       },
-      on_finish: function(data){
-        data.correct = (data.response === data.correct_index);
+      data: {
+        task: 'fixation'
       }
     };
 
-    return [sampleScreen, delay, choiceScreen];
-  }
+    var test = {
+      type: jsPsychImageKeyboardResponse,
+      stimulus: jsPsych.timelineVariable('stimulus'),
+      choices: ['f', 'j'],
+      data: {
+        task: 'response',
+        correct_response: jsPsych.timelineVariable('correct_response')
+      },
+      on_finish: function(data){
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+      }
+    };
 
-  // ---------------------------
-  // Build timeline
-  // ---------------------------
-  const jsPsych = initJsPsych({
-    on_finish: function(){
-      // Show quick summary
-      const trials = jsPsych.data.get().filter({phase:"choice"});
-      const acc = Math.round(100 * trials.select("correct").mean());
-      const rt  = Math.round(trials.select("rt").mean());
+    /* define test procedure */
+    var test_procedure = {
+      timeline: [fixation, test],
+      timeline_variables: test_stimuli,
+      repetitions: 5,
+      randomize_order: true
+    };
+    timeline.push(test_procedure);
 
-      const prolificInfo = (PROLIFIC_PID || STUDY_ID || SESSION_ID) ? `
-        <div style="font-size:14px; opacity:0.75;">
-          <div>PROLIFIC_PID: ${PROLIFIC_PID || "NA"}</div>
-          <div>STUDY_ID: ${STUDY_ID || "NA"}</div>
-          <div>SESSION_ID: ${SESSION_ID || "NA"}</div>
-        </div>` : "";
+    /* define debrief */
+    var debrief_block = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
 
-      
-      jsPsych.data.addProperties({PROLIFIC_PID, STUDY_ID, SESSION_ID}); // add Prolific info to all rows of data
-      url = "https://script.google.com/macros/s/AKfycbyLL_BGWmONph2F_4AQmY8-1k3n0jscD-8EdFpn2WbWnluYMQfLA147U6gbizP50cdu/exec";
-      jsPsychSheet.uploadData(url, jsPsych.data.get().csv())
+        var trials = jsPsych.data.get().filter({task: 'response'});
+        var correct_trials = trials.filter({correct: true});
+        var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+        var rt = Math.round(correct_trials.select('rt').mean());
 
-      document.body.innerHTML = `
-        <div class="center" style="max-width:720px; margin:60px auto;">
-          <h2>Done!</h2>
-          <p>Accuracy: <b>${acc}%</b></p>
-          <p>Mean RT: <b>${rt} ms</b></p>
-          ${prolificInfo}
-          <p style="margin-top:24px;">
-            <button id="dl" class="jspsych-btn">Download CSV</button>
-          </p>
-          <p style="font-size:14px; opacity:0.7;">
-            For real Prolific studies, you usually send data to a server rather than downloading.
-          </p>
-        </div>
-      `;
+        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
+          <p>Your average response time was ${rt}ms.</p>
+          <p>Press any key to complete the experiment. Thank you!</p>`;
 
-      document.getElementById("dl").onclick = () => {
-        const csv = jsPsych.data.get().csv();
-        const blob = new Blob([csv], {type: "text/csv"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "mts_jspsych_data.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      };
-    }
-  });
+      }
+    };
+    timeline.push(debrief_block);
 
-  // consent + instructions
-  const consent = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-      <div style="max-width:760px; margin:0 auto; font-size:18px; line-height:1.35;">
-        <h3>Consent (demo)</h3>
-        <p>This is a class demo match-to-sample task. You will see a sample color, a short delay, then choose the matching color.</p>
-        <p>No identifying information is collected in this demo (except Prolific IDs if launched via Prolific).</p>
-      </div>`,
-    choices: ["I agree, start"]
-  };
+    /* start the experiment */
+    jsPsych.run(timeline);
 
-  const instructions = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-      <div style="max-width:760px; margin:0 auto; font-size:18px; line-height:1.35;">
-        <h3>Instructions</h3>
-        <ol>
-          <li>You will see a <b>sample</b> color. Press <b>space</b>.</li>
-          <li>After a brief delay, choose the color that matches the sample.</li>
-          <li>Try to respond accurately.</li>
-        </ol>
-      </div>`,
-    choices: ["Continue"]
-  };
-
-  // Create 12 trials: sample vs foil
-  const trials = [];
-  for(let i=0; i<12; i++){
-    const sample = COLORS[Math.floor(Math.random()*COLORS.length)];
-    let foil = COLORS[Math.floor(Math.random()*COLORS.length)];
-    while(foil.name === sample.name) foil = COLORS[Math.floor(Math.random()*COLORS.length)];
-    trials.push(...makeMTSTrial(sample, foil));
-  }
-
-  jsPsych.run([consent, instructions, ...trials]);
-</script>
+  </script>
 </html>
