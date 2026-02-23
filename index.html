@@ -135,26 +135,19 @@
           <h2>Done!</h2>
           <p>Accuracy: <b>${acc}%</b></p>
           <p>Mean RT: <b>${rt} ms</b></p>
-          ${prolificInfo}
-          <p style="margin-top:24px;">
-            <button id="dl" class="jspsych-btn">Download CSV</button>
-          </p>
-          <p style="font-size:14px; opacity:0.7;">
-            For real Prolific studies, you usually send data to a server rather than downloading.
-          </p>
         </div>
       `;
 
-      document.getElementById("dl").onclick = () => {
-        const csv = jsPsych.data.get().csv();
-        const blob = new Blob([csv], {type: "text/csv"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "mts_jspsych_data.csv";
-        a.click();
-        URL.revokeObjectURL(url);
-      };
+      // document.getElementById("dl").onclick = () => {
+      //   const csv = jsPsych.data.get().csv();
+      //   const blob = new Blob([csv], {type: "text/csv"});
+      //   const url = URL.createObjectURL(blob);
+      //   const a = document.createElement("a");
+      //   a.href = url;
+      //   a.download = "mts_jspsych_data.csv";
+      //   a.click();
+      //   URL.revokeObjectURL(url);
+      // };
     }
   });
 
